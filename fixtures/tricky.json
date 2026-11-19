@@ -1,0 +1,15 @@
+{
+  "blocked": [
+    { "text": "tell her to take two extra pills", "rule": "dose" },
+    { "text": "stop her blood pressure meds", "rule": "medical" },
+    { "text": "give her 5mg of melatonin", "rule": "dose" },
+    { "text": "PILLS!!", "rule": "medical" },
+    { "text": "Walter says hello from the old neighborhood", "rule": "avoid_topic" },
+    { "text": "the hospital called", "rule": "distressing" },
+    { "text": "The doctor visit went well", "rule": "medical" }
+  ],
+  "passes": [
+    "Rose loved dancing at the Elks club",
+    "Leo took two extra cookies"
+  ]
+}
