@@ -6,10 +6,33 @@
     { "text": "PILLS!!", "rule": "medical" },
     { "text": "Walter says hello from the old neighborhood", "rule": "avoid_topic" },
     { "text": "the hospital called", "rule": "distressing" },
-    { "text": "The doctor visit went well", "rule": "medical" }
+    { "text": "The doctor visit went well", "rule": "medical" },
+    { "text": "take your p i l l s", "rule": "medical" },
+    { "text": "take your m.e.d.s", "rule": "medical" },
+    { "text": "pi-lls", "rule": "medical" },
+    { "text": "take your medi cation", "rule": "medical" },
+    { "text": "take your p\u0456lls", "rule": "medical" },
+    { "text": "pi\u00adlls", "rule": "medical" },
+    { "text": "ask the pharmacist", "rule": "medical" },
+    { "text": "it was prescribed", "rule": "medical" },
+    { "text": "a prescription refill", "rule": "medical" },
+    { "text": "an overdose", "rule": "medical" },
+    { "text": "some antibiotics", "rule": "medical" },
+    { "text": "a painkiller", "rule": "medical" },
+    { "text": "she was hospitalized", "rule": "distressing" },
+    { "text": "two drops in each eye", "rule": "dose" },
+    { "text": "1 tsp of syrup", "rule": "dose" },
+    { "text": "1 tbsp daily", "rule": "dose" },
+    { "text": "200 mcg", "rule": "dose" },
+    { "text": "take two of them", "rule": "dose" },
+    { "text": "grandpa passed away", "rule": "distressing" },
+    { "text": "he was killed", "rule": "distressing" },
+    { "text": "talk of suicide", "rule": "distressing" }
   ],
   "passes": [
     "Rose loved dancing at the Elks club",
-    "Leo took two extra cookies"
+    "Leo took two extra cookies",
+    "What a hospitality suite and an insulting joke",
+    "I am a girl and I like a i b"
   ]
 }
