@@ -43,7 +43,7 @@ Each adapter has an `available()` check and the crew falls back when it is off.
 | Language model reviewer | AWS variables plus `LLM_MODEL_ID` (Bedrock) | rules only |
 | Depth | `DEPTH=1` | no depth map, the radio uses a gentle zoom |
 
-Install the optional packages only when you use them: `npm install --no-save @aws-sdk/client-polly @aws-sdk/client-bedrock-runtime @huggingface/transformers`.
+The AWS packages are optional dependencies and install with `npm ci`. Depth needs `npm install --no-save @huggingface/transformers`.
 
 Telegram rules: direct messages only, senders must be on the allowlist, and only the caregiver can use `/remind HH:MM text`.
 
@@ -60,4 +60,5 @@ The radio and the crew share two files and nothing else: `schema/show-playlist.s
 - The Care Checker is deterministic. It misses paraphrases and over-blocks health words on purpose.
 - Voice recordings are not transcribed, so only the sender, caption and photo alt text are checked.
 - On this day stories are marked `verified: false` until a person checks them against their primary source.
-- Live mode stores family files in the repository. Run it from a private repository.
+- Live mode stores family files and Telegram ids in the repository. Run it only from a private fork.
+- `ingest.yml` and `nightly.yml` run only when the repository variable `LIVE_MODE` is `true`. It is unset in this public repository, so only the demo runs here. Set it in a private fork, with the Telegram and AWS secrets, to go live.
