@@ -102,3 +102,12 @@ test('reminders over 200 characters or with repeated ids fail loudly', () => {
   assert.throws(() => checkReminders([{ id: 'a', text: 'x'.repeat(201), time: '09:00' }]), /200 characters/)
   assert.throws(() => checkReminders([{ id: 'a', text: 'x', time: '09:00' }, { id: 'a', text: 'y', time: '10:00' }]), /more than once/)
 })
+
+test('host, story and reminder lines use the recorded voice bank when present', async () => {
+  const { playlist, outDir } = await demo()
+  const spoken = playlist.segments.filter((s) => ['host', 'story', 'reminder'].includes(s.kind))
+  for (const s of spoken) {
+    assert.match(s.audio.src, /^media\/tts-[0-9a-f]{16}\.mp3$/)
+    assert.ok(existsSync(join(outDir, s.audio.src)))
+  }
+})

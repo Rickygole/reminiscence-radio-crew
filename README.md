@@ -39,7 +39,7 @@ Each adapter has an `available()` check and the crew falls back when it is off.
 | Adapter | Switches on with | Fallback |
 | --- | --- | --- |
 | Telegram | `TELEGRAM_BOT_TOKEN`, `FAMILY_ALLOWLIST` (comma separated user ids) | demo inbox fixtures |
-| Polly | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, optional `POLLY_VOICE` (default Matthew, neural) | `{ "speak": true }`, the browser reads the line aloud |
+| Polly | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, optional `POLLY_VOICE` (default Matthew, neural) | a matching clip in `voice/` (Kokoro, voice af_heart), else `{ "speak": true }` and the browser reads the line aloud |
 | Language model reviewer | AWS variables plus `LLM_MODEL_ID` (Bedrock) | rules only |
 | Depth | `DEPTH=1` | no depth map, the radio uses a gentle zoom |
 
@@ -62,3 +62,14 @@ The radio and the crew share two files and nothing else: `schema/show-playlist.s
 - On this day stories are marked `verified: false` until a person checks them against their primary source.
 - Live mode stores family files and Telegram ids in the repository. Run it only from a private fork.
 - `ingest.yml` and `nightly.yml` run only when the repository variable `LIVE_MODE` is `true`. It is unset in this public repository, so only the demo runs here. Set it in a private fork, with the Telegram and AWS secrets, to go live.
+
+## Host voice bank
+
+Without AWS credentials the host speaks from `voice/`, clips rendered once with the open Kokoro text to speech model (Apache-2.0, voice af_heart). The host is a computer voice and is labelled as one. Family voices are never synthesized. To add clips for new lines:
+
+```
+pip install kokoro-onnx soundfile
+python scripts/render-voice.py <show.json> kokoro-v1.0.onnx voices-v1.0.bin
+```
+
+Model files: https://github.com/thewh1teagle/kokoro-onnx/releases/tag/model-files-v1.0

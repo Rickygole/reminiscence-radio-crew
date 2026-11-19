@@ -1,8 +1,13 @@
-import { copyFileSync, mkdirSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { ttsName } from '../adapters/polly.js'
 import { execFileSync } from 'node:child_process'
 import { basename, extname, join } from 'node:path'
 import { enforceReminders } from './care-checker.js'
 import { validatePlaylist, assertValid } from '../validate.js'
+
+export const VOICE_BANK = fileURLToPath(new URL('../../voice', import.meta.url))
+export const BANK_VOICE = 'kokoro-af_heart'
 
 const OGG = new Set(['.ogg', '.oga', '.opus'])
 
@@ -41,7 +46,13 @@ export const producer = async (input, ctx) => {
   })
   if (!ordered.some((s) => s.kind === 'reminder')) ordered = ordered.filter((s) => s.id !== 'caregiver-intro')
 
-  const tts = async (text) => (adapters.polly.available() ? adapters.polly.synth(text, mediaDir) : { speak: true })
+  const bank = (text) => {
+    const name = ttsName(text, BANK_VOICE)
+    if (!existsSync(join(VOICE_BANK, name))) return { speak: true }
+    copyFileSync(join(VOICE_BANK, name), join(mediaDir, name))
+    return { src: `media/${name}` }
+  }
+  const tts = async (text) => (adapters.polly.available() ? adapters.polly.synth(text, mediaDir) : bank(text))
 
   const segments = []
   for (const seg of ordered) {
