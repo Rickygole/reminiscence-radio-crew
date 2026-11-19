@@ -1,0 +1,24 @@
+{
+  "name": "reminiscence-radio-crew",
+  "version": "0.1.0",
+  "displayName": "Reminiscence Radio Crew",
+  "description": "Five agents that build a calm daily radio show for a person with memory loss from family messages and caregiver reminders",
+  "author": "Reminiscence Radio team",
+  "license": "MIT",
+  "agents": [
+    "agents/archivist.json",
+    "agents/music-director.json",
+    "agents/scriptwriter.json",
+    "agents/care-checker.json",
+    "agents/producer.json"
+  ],
+  "crons": [
+    {
+      "name": "nightly-show",
+      "cron_expr": "0 5 * * *",
+      "message": "Build tomorrow's show. Run each stage in order: archivist, music_director, scriptwriter, care_checker, producer.",
+      "agent": "producer",
+      "enabled": false
+    }
+  ]
+}
