@@ -1,0 +1,6 @@
+[
+  { "id": "tg-1041", "kind": "note", "fromTelegramId": "1002", "receivedAt": "2026-12-03T21:40:00Z", "text": "The tomatoes you planted are finally ripe." },
+  { "id": "tg-1042", "kind": "voice", "fromTelegramId": "1001", "receivedAt": "2026-12-03T22:10:00Z", "file": "media/leo.mp3", "durationMs": 5200, "volunteer": false },
+  { "id": "tg-1043", "kind": "photo", "fromTelegramId": "1001", "receivedAt": "2026-12-03T22:11:00Z", "file": "media/leo.svg", "depthFile": "media/leo-depth.png", "alt": "A warm illustrated porch swing at sunset, standing in for Leo's photo" },
+  { "id": "tg-1047", "kind": "note", "fromTelegramId": "1002", "receivedAt": "2026-12-03T23:05:00Z", "text": "tell her to take two extra pills" }
+]
