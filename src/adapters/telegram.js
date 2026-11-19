@@ -35,6 +35,7 @@ export const mapUpdates = (updates, { allowlist, profile }) => {
   const roles = new Map(profile.family.map((f) => [f.telegramId, f.role]))
   const items = []
   const reminders = []
+  const rejected = []
   for (const u of updates) {
     const msg = u.message
     if (!msg || msg.chat?.type !== 'private') continue
@@ -44,6 +45,7 @@ export const mapUpdates = (updates, { allowlist, profile }) => {
     if (typeof msg.text === 'string' && msg.text.startsWith('/remind')) {
       const parsed = roles.get(from) === 'caregiver' ? parseRemind(msg.text) : null
       if (parsed) reminders.push({ id: `rem-${u.update_id}`, ...parsed })
+      else rejected.push({ id: `rem-${u.update_id}`, reason: roles.get(from) === 'caregiver' ? 'not in the form /remind HH:MM text' : 'only the caregiver can set reminders' })
     } else if (msg.voice) {
       items.push({ ...base, kind: 'voice', fileId: msg.voice.file_id, durationMs: Math.max(1, Math.round(msg.voice.duration * 1000)), ...(clean(msg.caption ?? '') ? { caption: clean(msg.caption) } : {}) })
     } else if (Array.isArray(msg.photo) && msg.photo.length) {
@@ -52,7 +54,7 @@ export const mapUpdates = (updates, { allowlist, profile }) => {
       items.push({ ...base, kind: 'note', text: msg.text.replace(CONTROL, ' ').trim() })
     }
   }
-  return { items, reminders }
+  return { items, reminders, rejected }
 }
 
 export const telegram = (env = process.env) => {

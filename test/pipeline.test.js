@@ -6,7 +6,7 @@ import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { demoAdapters } from '../src/adapters/index.js'
 import { demoClock, createLog } from '../src/events.js'
-import { loadData, newState, runPipeline, publish } from '../src/pipeline.js'
+import { loadData, newState, runPipeline, publish, checkReminders } from '../src/pipeline.js'
 import { validatePlaylist, validateEvents } from '../src/validate.js'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -86,4 +86,19 @@ test('live publish writes only latest and prunes unreferenced media', () => {
   publish({ outDir, flat: false }, playlist, { events: [] })
   assert.deepEqual(readdirSync(join(outDir, 'show')), ['latest.json'])
   assert.deepEqual(readdirSync(join(outDir, 'media')).sort(), ['keep.mp3', 'photo.png'])
+})
+
+test('only items from the last 24 hours before the show are used, newest twelve at most', async () => {
+  const base = readJson(join(inboxDir, 'inbox.json'))
+  const stale = { id: 'tg-1', kind: 'note', fromTelegramId: '1002', receivedAt: '2026-11-20T10:00:00Z', text: 'An old hello' }
+  const { playlist } = await demo([...base, stale])
+  assert.ok(!playlist.segments.some((s) => s.sourceItemIds.includes('tg-1')))
+  const many = Array.from({ length: 30 }, (_, i) => ({ id: `tg-n${i}`, kind: 'note', fromTelegramId: '1002', receivedAt: `2026-12-03T${String(10 + (i % 12)).padStart(2, '0')}:${String(i).padStart(2, '0')}:00Z`, text: `Hello number ${i}` }))
+  const { events } = await demo(many)
+  assert.equal(events.events.filter((e) => e.agent === 'archivist' && e.type === 'item_in' && e.itemIds?.[0].startsWith('tg-')).length, 12)
+})
+
+test('reminders over 200 characters or with repeated ids fail loudly', () => {
+  assert.throws(() => checkReminders([{ id: 'a', text: 'x'.repeat(201), time: '09:00' }]), /200 characters/)
+  assert.throws(() => checkReminders([{ id: 'a', text: 'x', time: '09:00' }, { id: 'a', text: 'y', time: '10:00' }]), /more than once/)
 })

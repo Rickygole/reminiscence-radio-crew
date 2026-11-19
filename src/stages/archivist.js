@@ -10,9 +10,22 @@ const bySender = (items) => {
   return map
 }
 
-export const archivist = async ({ items, profile, reminders }, ctx) => {
+export const MAX_ITEMS = 12
+const DAY = 86400000
+
+export const inWindow = (item, date) => {
+  const end = Date.parse(`${date}T10:00:00Z`)
+  const at = Date.parse(item.receivedAt)
+  return at >= end - DAY && at < end
+}
+
+export const archivist = async ({ items: all, profile, reminders, date }, ctx) => {
   const { emit } = ctx
   emit('archivist', 'start', 'Opening the family inbox')
+  const fresh = all.filter((i) => inWindow(i, date))
+  if (fresh.length !== all.length) emit('archivist', 'work', `Left ${all.length - fresh.length} items outside the last 24 hours for another day`)
+  const items = fresh.sort((a, b) => b.receivedAt.localeCompare(a.receivedAt)).slice(0, MAX_ITEMS)
+  if (items.length < fresh.length) emit('archivist', 'work', `Kept the newest ${MAX_ITEMS} items for this show`)
   const family = new Map(profile.family.map((f) => [f.telegramId, f]))
   const known = items.filter((i) => family.has(i.fromTelegramId)).sort((a, b) => a.receivedAt.localeCompare(b.receivedAt))
   const dropped = items.length - known.length

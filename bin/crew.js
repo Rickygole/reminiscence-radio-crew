@@ -39,15 +39,19 @@ const ingest = async () => {
   const stateFile = join(root, 'inbox/state.json')
   const state = readJson(stateFile, { offset: 0 })
   const updates = await adapters.telegram.getUpdates(state.offset)
-  const { items, reminders } = mapUpdates(updates, { allowlist: adapters.telegram.allowlist(), profile: data.profile })
+  const mapped = mapUpdates(updates, { allowlist: adapters.telegram.allowlist(), profile: data.profile })
   const all = readJson(join(root, 'inbox/items.json'), [])
+  const have = new Set(all.map((i) => i.id))
+  const items = mapped.items.filter((i) => !have.has(i.id))
+  const filed = readJson(join(root, 'data/reminders.json'), [])
+  const reminders = mapped.reminders.filter((r) => !filed.some((f) => f.id === r.id))
+  for (const r of mapped.rejected) console.error(`Reminder ${r.id} rejected: ${r.reason}`)
   if (updates.length) {
     state.offset = updates[updates.length - 1].update_id + 1
     writeJson(stateFile, state)
   }
   if (reminders.length) {
-    const file = join(root, 'data/reminders.json')
-    writeJson(file, [...readJson(file, []), ...reminders])
+    writeJson(join(root, 'data/reminders.json'), [...filed, ...reminders])
   }
   for (const item of items) {
     if (item.fileId) {

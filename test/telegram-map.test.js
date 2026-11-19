@@ -72,3 +72,9 @@ test('downloads must have an allowed extension, a small size and matching magic 
   assert.throws(() => checkDownload('photos/file_7.png', Buffer.from([0xff, 0xd8, 0xff])), /does not match/)
   assert.throws(() => checkDownload('voice/file_8.ogg', Buffer.alloc(MAX_DOWNLOAD + 1, 0x4f)), /20 MB/)
 })
+
+test('rejected reminders are reported with a reason', () => {
+  const { rejected } = mapUpdates([msg(1, 1001, { text: '/remind 12:30 sneaky' }), msg(2, 1003, { text: '/remind 99:99 bad' })], { allowlist, profile })
+  assert.deepEqual(rejected.map((r) => r.id), ['rem-1', 'rem-2'])
+  assert.match(rejected[0].reason, /caregiver/)
+})

@@ -16,15 +16,27 @@ const writeJson = (path, value) => {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`)
 }
 
+export const MAX_REMINDER = 200
+
+export const checkReminders = (list) => {
+  const seen = new Set()
+  for (const r of list) {
+    if (seen.has(r.id)) throw new Error(`Reminder ${r.id} appears more than once in data/reminders.json`)
+    seen.add(r.id)
+    if (typeof r.text !== 'string' || r.text.length > MAX_REMINDER) throw new Error(`Reminder ${r.id} is longer than ${MAX_REMINDER} characters; shorten it in data/reminders.json`)
+  }
+  return list
+}
+
 export const loadData = (root) => ({
   profile: readJson(join(root, 'data/profile.json')),
   library: readJson(join(root, 'data/music-library.json')),
   stories: readJson(join(root, 'data/stories.json')),
-  reminders: readJson(join(root, 'data/reminders.json'))
+  reminders: checkReminders(readJson(join(root, 'data/reminders.json')))
 })
 
 const STAGES = {
-  archivist: (s, ctx) => archivist({ items: s.inbox, profile: s.data.profile, reminders: s.data.reminders }, ctx),
+  archivist: (s, ctx) => archivist({ items: s.inbox, profile: s.data.profile, reminders: s.data.reminders, date: s.date }, ctx),
   music_director: (s, ctx) => musicDirector({ date: s.date, profile: s.data.profile, library: s.data.library, passIds: s.outputs.archivist.passIds }, ctx),
   scriptwriter: (s, ctx) =>
     scriptwriter(
