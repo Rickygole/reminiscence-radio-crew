@@ -1,5 +1,5 @@
-import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs'
-import { join } from 'node:path'
+import { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync, rmSync } from 'node:fs'
+import { basename, join } from 'node:path'
 import { AGENTS, createLog } from './events.js'
 import { archivist } from './stages/archivist.js'
 import { musicDirector } from './stages/music-director.js'
@@ -88,13 +88,20 @@ export const buildEvents = (state, log, result) => ({
   result
 })
 
-export const publish = ({ outDir, flat, date }, playlist, events) => {
+const pruneMedia = (outDir, playlist) => {
+  const dir = join(outDir, 'media')
+  if (!existsSync(dir)) return
+  const used = new Set(playlist.segments.flatMap((s) => [s.audio?.src, s.photo?.src, s.photo?.depthSrc]).filter(Boolean).map((p) => basename(p)))
+  for (const name of readdirSync(dir)) if (!used.has(name)) rmSync(join(dir, name), { recursive: true, force: true })
+}
+
+export const publish = ({ outDir, flat }, playlist, events) => {
   if (flat) {
     writeJson(join(outDir, 'show.json'), playlist)
     writeJson(join(outDir, 'events.json'), events)
   } else {
     writeJson(join(outDir, 'show', 'latest.json'), playlist)
-    writeJson(join(outDir, 'show', `${date}.json`), playlist)
+    pruneMedia(outDir, playlist)
     writeJson(join(outDir, 'events', 'latest.json'), events)
   }
 }
@@ -137,7 +144,7 @@ export const runPipeline = async ({ state, adapters, clock, runsDir, flat = fals
   const playlist = state.outputs.producer
   const events = buildEvents(state, log, { status: 'ok', showId: playlist.showId, segments: playlist.segments.length })
   assertValid(validateEvents(events), 'Crew events')
-  publish({ outDir: state.outDir, flat, date: state.date }, playlist, events)
+  publish({ outDir: state.outDir, flat }, playlist, events)
   if (runsDir) writeJson(join(runsDir, state.date, 'events.json'), events)
   return { playlist, events, log }
 }

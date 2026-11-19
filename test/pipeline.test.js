@@ -1,12 +1,12 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, readFileSync, existsSync } from 'node:fs'
+import { mkdtempSync, readFileSync, existsSync, mkdirSync, writeFileSync, readdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { demoAdapters } from '../src/adapters/index.js'
 import { demoClock, createLog } from '../src/events.js'
-import { loadData, newState, runPipeline } from '../src/pipeline.js'
+import { loadData, newState, runPipeline, publish } from '../src/pipeline.js'
 import { validatePlaylist, validateEvents } from '../src/validate.js'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -76,4 +76,14 @@ test('senders outside the family list are ignored', async () => {
 test('a failing stage reports failed_kept_previous', async () => {
   const items = readJson(join(inboxDir, 'inbox.json')).map((i) => (i.kind === 'voice' ? { ...i, file: 'media/missing.mp3' } : i))
   await assert.rejects(demo(items), (err) => err.events.result.status === 'failed_kept_previous' && err.events.events.at(-1).type === 'error')
+})
+
+test('live publish writes only latest and prunes unreferenced media', () => {
+  const outDir = mkdtempSync(join(tmpdir(), 'crew-'))
+  mkdirSync(join(outDir, 'media'))
+  for (const f of ['keep.mp3', 'photo.png', 'old.mp3']) writeFileSync(join(outDir, 'media', f), 'x')
+  const playlist = { segments: [{ audio: { src: 'media/keep.mp3' }, photo: { src: 'media/photo.png' } }, { audio: { speak: true } }] }
+  publish({ outDir, flat: false }, playlist, { events: [] })
+  assert.deepEqual(readdirSync(join(outDir, 'show')), ['latest.json'])
+  assert.deepEqual(readdirSync(join(outDir, 'media')).sort(), ['keep.mp3', 'photo.png'])
 })
