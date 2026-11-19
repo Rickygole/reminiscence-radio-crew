@@ -3,7 +3,7 @@ import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { buildAdapters, demoAdapters } from '../src/adapters/index.js'
-import { mapUpdates } from '../src/adapters/telegram.js'
+import { checkDownload, mapUpdates } from '../src/adapters/telegram.js'
 import { demoClock, realClock, createLog } from '../src/events.js'
 import { STAGE_NAMES, loadData, newState, runPipeline, saveRun, loadRun } from '../src/pipeline.js'
 
@@ -41,23 +41,29 @@ const ingest = async () => {
   const updates = await adapters.telegram.getUpdates(state.offset)
   const { items, reminders } = mapUpdates(updates, { allowlist: adapters.telegram.allowlist(), profile: data.profile })
   const all = readJson(join(root, 'inbox/items.json'), [])
-  for (const item of items) {
-    if (item.fileId) {
-      const { bytes, path } = await adapters.telegram.download(item.fileId)
-      const ext = path.includes('.') ? path.slice(path.lastIndexOf('.')) : ''
-      item.file = `files/${item.id}${ext}`
-      mkdirSync(join(root, 'inbox/files'), { recursive: true })
-      writeFileSync(join(root, 'inbox', item.file), bytes)
-    }
-    all.push(item)
+  if (updates.length) {
+    state.offset = updates[updates.length - 1].update_id + 1
+    writeJson(stateFile, state)
   }
-  writeJson(join(root, 'inbox/items.json'), all)
   if (reminders.length) {
     const file = join(root, 'data/reminders.json')
     writeJson(file, [...readJson(file, []), ...reminders])
   }
-  if (updates.length) state.offset = updates[updates.length - 1].update_id + 1
-  writeJson(stateFile, state)
+  for (const item of items) {
+    if (item.fileId) {
+      try {
+        const { bytes, path } = await adapters.telegram.download(item.fileId)
+        item.file = `files/${item.id}${checkDownload(path, bytes)}`
+        mkdirSync(join(root, 'inbox/files'), { recursive: true })
+        writeFileSync(join(root, 'inbox', item.file), bytes)
+      } catch (err) {
+        console.error(`Skipped ${item.id}: ${err.message}`)
+        continue
+      }
+    }
+    all.push(item)
+    writeJson(join(root, 'inbox/items.json'), all)
+  }
   console.log(`Ingested ${items.length} items and ${reminders.length} reminders`)
 }
 

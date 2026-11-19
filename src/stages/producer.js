@@ -13,7 +13,7 @@ const makeMedia = (inboxDir, mediaDir) => {
     const ext = extname(rel).toLowerCase()
     const stem = basename(rel, extname(rel))
     if (OGG.has(ext)) {
-      execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', from, '-codec:a', 'libmp3lame', '-q:a', '5', join(mediaDir, `${stem}.mp3`)])
+      execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-protocol_whitelist', 'file', '-f', 'ogg', '-i', from, '-codec:a', 'libmp3lame', '-q:a', '5', join(mediaDir, `${stem}.mp3`)])
       return `media/${stem}.mp3`
     }
     copyFileSync(from, join(mediaDir, basename(rel)))

@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mapUpdates, parseRemind, telegram } from '../src/adapters/telegram.js'
+import { mapUpdates, parseRemind, telegram, checkDownload, MAX_DOWNLOAD } from '../src/adapters/telegram.js'
 import { polly } from '../src/adapters/polly.js'
 import { llm } from '../src/adapters/llm.js'
 import { depth } from '../src/adapters/depth.js'
@@ -53,4 +53,22 @@ test('adapters switch on from environment variables', () => {
   assert.equal(polly(aws).available(), true)
   assert.equal(llm(aws).available(), false)
   assert.equal(llm({ ...aws, LLM_MODEL_ID: 'm' }).available(), true)
+})
+
+test('captions lose control characters and extra whitespace', () => {
+  const { items } = mapUpdates([msg(1, 1001, { voice: { file_id: 'v', duration: 3 }, caption: ' hi\u0000\u001b[31m  there\n\u007f ' }), msg(2, 1001, { photo: [{ file_id: 'p' }], caption: '\u0007' })], { allowlist, profile })
+  assert.equal(items[0].caption, 'hi [31m there')
+  assert.equal('caption' in items[1], false)
+})
+
+test('downloads must have an allowed extension, a small size and matching magic bytes', () => {
+  const ogg = Buffer.from('OggS....')
+  assert.equal(checkDownload('voice/file_1.oga', ogg), '.oga')
+  assert.equal(checkDownload('photos/file_2.JPG', Buffer.from([0xff, 0xd8, 0xff, 0xe0])), '.jpg')
+  assert.equal(checkDownload('photos/file_3.png', Buffer.from([0x89, 0x50, 0x4e, 0x47])), '.png')
+  assert.throws(() => checkDownload('docs/file_4.m3u8', ogg), /not allowed/)
+  assert.throws(() => checkDownload('voice/file_5', ogg), /not allowed/)
+  assert.throws(() => checkDownload('voice/file_6.ogg', Buffer.from('#EXTM3U')), /does not match/)
+  assert.throws(() => checkDownload('photos/file_7.png', Buffer.from([0xff, 0xd8, 0xff])), /does not match/)
+  assert.throws(() => checkDownload('voice/file_8.ogg', Buffer.alloc(MAX_DOWNLOAD + 1, 0x4f)), /20 MB/)
 })
