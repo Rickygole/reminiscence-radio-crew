@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "show-playlist.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "showId", "date", "mode", "listener", "generatedAt", "runId", "segments", "safety"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "showId": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "date": { "type": "string", "format": "date" },
+    "mode": { "enum": ["demo", "live"] },
+    "listener": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "birthYear", "fictional"],
+      "properties": {
+        "name": { "type": "string" },
+        "birthYear": { "type": "integer", "minimum": 1920, "maximum": 1970 },
+        "fictional": { "const": true }
+      }
+    },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "runId": { "type": "string" },
+    "segments": { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/segment" } },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rulesVersion", "llmReview", "blocked", "fixed"],
+      "properties": {
+        "rulesVersion": { "type": "string" },
+        "llmReview": { "type": "boolean" },
+        "blocked": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+        "fixed": { "type": "array", "items": { "$ref": "#/$defs/finding" } }
+      }
+    }
+  },
+  "$defs": {
+    "rule": { "enum": ["medical", "dose", "avoid_topic", "distressing", "memory_quiz", "too_long", "reminder_not_verbatim", "llm_flag"] },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["itemId", "rule", "reason"],
+      "properties": {
+        "itemId": { "type": "string" },
+        "segmentId": { "type": "string" },
+        "rule": { "$ref": "#/$defs/rule" },
+        "reason": { "type": "string" }
+      }
+    },
+    "src": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["src"],
+      "properties": { "src": { "type": "string" }, "durationMs": { "type": "integer", "minimum": 1 } }
+    },
+    "speak": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["speak"],
+      "properties": { "speak": { "const": true } }
+    },
+    "synth": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["synth"],
+      "properties": {
+        "synth": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["recipe", "seed", "bpm", "key", "seconds"],
+          "properties": {
+            "recipe": { "enum": ["doowop_ballad", "lounge_swing", "country_waltz"] },
+            "seed": { "type": "integer" },
+            "bpm": { "type": "integer", "minimum": 50, "maximum": 140 },
+            "key": { "type": "string", "pattern": "^[A-G](b|#)?$" },
+            "seconds": { "type": "integer", "minimum": 20, "maximum": 240 }
+          }
+        }
+      }
+    },
+    "photo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["src", "alt"],
+      "properties": {
+        "src": { "type": "string" },
+        "depthSrc": { "type": "string" },
+        "alt": { "type": "string", "minLength": 3 }
+      }
+    },
+    "ids": { "type": "array", "items": { "type": "string" } },
+    "segment": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "kind", "text", "audio", "sourceItemIds"],
+          "properties": {
+            "id": { "type": "string" },
+            "kind": { "const": "host" },
+            "text": { "type": "string", "minLength": 1 },
+            "audio": { "oneOf": [{ "$ref": "#/$defs/src" }, { "$ref": "#/$defs/speak" }] },
+            "sourceItemIds": { "$ref": "#/$defs/ids" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "kind", "text", "year", "sourceUrl", "audio", "sourceItemIds"],
+          "properties": {
+            "id": { "type": "string" },
+            "kind": { "const": "story" },
+            "text": { "type": "string" },
+            "year": { "type": "integer" },
+            "sourceUrl": { "type": "string", "format": "uri" },
+            "audio": { "oneOf": [{ "$ref": "#/$defs/src" }, { "$ref": "#/$defs/speak" }] },
+            "sourceItemIds": { "$ref": "#/$defs/ids" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "kind", "from", "caption", "audio", "sourceItemIds"],
+          "properties": {
+            "id": { "type": "string" },
+            "kind": { "const": "voice_message" },
+            "from": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "relation"],
+              "properties": { "name": { "type": "string" }, "relation": { "type": "string" } }
+            },
+            "caption": { "type": "string" },
+            "performedByVolunteer": { "type": "boolean" },
+            "audio": { "$ref": "#/$defs/src" },
+            "photo": { "$ref": "#/$defs/photo" },
+            "sourceItemIds": { "$ref": "#/$defs/ids" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "kind", "title", "era", "credit", "audio", "sourceItemIds"],
+          "properties": {
+            "id": { "type": "string" },
+            "kind": { "const": "song" },
+            "title": { "type": "string" },
+            "era": { "type": "string" },
+            "credit": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["author", "license", "source"],
+              "properties": { "author": { "type": "string" }, "license": { "type": "string" }, "source": { "type": "string" } }
+            },
+            "audio": { "oneOf": [{ "$ref": "#/$defs/src" }, { "$ref": "#/$defs/synth" }] },
+            "sourceItemIds": { "$ref": "#/$defs/ids" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "kind", "reminderId", "text", "author", "audio", "sourceItemIds"],
+          "properties": {
+            "id": { "type": "string" },
+            "kind": { "const": "reminder" },
+            "reminderId": { "type": "string" },
+            "text": { "type": "string", "minLength": 1, "maxLength": 200 },
+            "time": { "type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$" },
+            "author": { "const": "caregiver" },
+            "audio": { "oneOf": [{ "$ref": "#/$defs/src" }, { "$ref": "#/$defs/speak" }] },
+            "sourceItemIds": { "$ref": "#/$defs/ids" }
+          }
+        }
+      ]
+    }
+  }
+}

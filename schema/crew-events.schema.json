@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "crew-events.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "runId", "startedAt", "mode", "agents", "items", "events", "result"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "runId": { "type": "string" },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "mode": { "enum": ["demo", "live"] },
+    "agents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "job"],
+        "properties": {
+          "id": { "enum": ["archivist", "music_director", "scriptwriter", "care_checker", "producer"] },
+          "name": { "type": "string" },
+          "job": { "type": "string" }
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "label"],
+        "properties": {
+          "id": { "type": "string" },
+          "kind": { "enum": ["voice", "photo", "note", "reminder"] },
+          "label": { "type": "string" },
+          "from": { "type": "string" },
+          "hero": { "type": "boolean" }
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["seq", "t", "agent", "type", "message"],
+        "properties": {
+          "seq": { "type": "integer" },
+          "t": { "type": "integer", "minimum": 0 },
+          "agent": { "enum": ["archivist", "music_director", "scriptwriter", "care_checker", "producer"] },
+          "type": { "enum": ["start", "item_in", "work", "flag", "block", "fix", "handoff", "done", "error"] },
+          "to": { "enum": ["archivist", "music_director", "scriptwriter", "care_checker", "producer"] },
+          "itemIds": { "type": "array", "items": { "type": "string" } },
+          "message": { "type": "string", "maxLength": 140 }
+        },
+        "if": { "properties": { "type": { "const": "handoff" } }, "required": ["type"] },
+        "then": { "required": ["to", "itemIds"] }
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "enum": ["ok", "failed_kept_previous"] },
+        "showId": { "type": "string" },
+        "segments": { "type": "integer" }
+      }
+    }
+  }
+}
