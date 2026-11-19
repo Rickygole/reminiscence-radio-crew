@@ -11,13 +11,10 @@ export const demoClock = (stepMs = 700) => {
   return { elapsed: () => (n++) * stepMs }
 }
 
-export const realClock = () => {
-  const t0 = Date.now()
-  return { elapsed: () => Date.now() - t0 }
-}
+export const realClock = (t0 = Date.now()) => ({ elapsed: () => Math.max(0, Date.now() - t0) })
 
-export const createLog = (clock) => {
-  const events = []
+export const createLog = (clock, existing = []) => {
+  const events = [...existing]
   const emit = (agent, type, message, extra = {}) => {
     const event = { seq: events.length + 1, t: clock.elapsed(), agent, type, message: String(message).slice(0, 140) }
     if (extra.to) event.to = extra.to

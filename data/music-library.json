@@ -1,0 +1,62 @@
+[
+  {
+    "id": "sunday-drive",
+    "title": "Sunday Drive",
+    "era": "1961",
+    "recipe": "country_waltz",
+    "seed": 61,
+    "bpm": 84,
+    "key": "G",
+    "seconds": 52
+  },
+  {
+    "id": "porch-light-waltz",
+    "title": "Porch Light Waltz",
+    "era": "1959",
+    "recipe": "doowop_ballad",
+    "seed": 59,
+    "bpm": 66,
+    "key": "Bb",
+    "seconds": 50
+  },
+  {
+    "id": "elks-club-swing",
+    "title": "Elks Club Swing",
+    "era": "1960",
+    "recipe": "lounge_swing",
+    "seed": 60,
+    "bpm": 92,
+    "key": "F",
+    "seconds": 48
+  },
+  {
+    "id": "lemonade-evening",
+    "title": "Lemonade Evening",
+    "era": "1962",
+    "recipe": "doowop_ballad",
+    "seed": 62,
+    "bpm": 62,
+    "key": "Eb",
+    "seconds": 50
+  },
+  {
+    "id": "hometown-dance",
+    "title": "Hometown Dance",
+    "era": "1963",
+    "recipe": "lounge_swing",
+    "seed": 63,
+    "bpm": 100,
+    "key": "C",
+    "seconds": 46
+  },
+  {
+    "id": "garden-gate",
+    "title": "Garden Gate",
+    "era": "1964",
+    "recipe": "country_waltz",
+    "seed": 64,
+    "bpm": 78,
+    "key": "D",
+    "seconds": 54
+  }
+]

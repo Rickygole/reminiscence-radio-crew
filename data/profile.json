@@ -1,0 +1,11 @@
+{
+  "name": "Rose",
+  "birthYear": 1946,
+  "hometown": "Dayton, OH",
+  "family": [
+    { "name": "Leo", "relation": "grandson", "telegramId": "1001", "role": "family" },
+    { "name": "Mia", "relation": "granddaughter", "telegramId": "1002", "role": "family" },
+    { "name": "Ellen", "relation": "daughter", "telegramId": "1003", "role": "caregiver" }
+  ],
+  "avoidTopics": ["Walter"]
+}

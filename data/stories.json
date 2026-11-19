@@ -1,0 +1,8 @@
+[
+  { "id": "story-gemini7", "monthDay": "12-04", "year": 1965, "text": "Two astronauts blasted off in Gemini 7 for a two week trip around the Earth. Families across the country listened on the radio and cheered them on.", "sourceUrl": "https://www.nasa.gov/", "verified": false },
+  { "id": "story-glenn", "monthDay": "02-20", "year": 1962, "text": "John Glenn became the first American to circle the Earth, riding in a little capsule named Friendship 7. Neighbors gathered around radios and televisions to share the moment.", "sourceUrl": "https://www.nasa.gov/", "verified": false },
+  { "id": "story-shepard", "monthDay": "05-05", "year": 1961, "text": "Alan Shepard rode a rocket high above the clouds and came safely home. Schools let the children listen in, and the whole country felt a little taller.", "sourceUrl": "https://www.nasa.gov/", "verified": false },
+  { "id": "story-seattle", "monthDay": "04-21", "year": 1962, "text": "The Seattle World's Fair opened its gates, with a tall Space Needle, a monorail and crowds in their Sunday best. Visitors came from every state to wander and wonder.", "sourceUrl": "https://www.loc.gov/", "verified": false },
+  { "id": "story-mustang", "monthDay": "04-17", "year": 1964, "text": "A shiny new car called the Mustang was shown to the public at the New York World's Fair. Young drivers dreamed of a long open road and the radio turned up.", "sourceUrl": "https://www.si.edu/", "verified": false },
+  { "id": "story-apollo11", "monthDay": "07-20", "year": 1969, "text": "Families sat close together on warm summer evenings as the first people walked on the Moon. Many remember the hush in the room, and then the happy cheering.", "sourceUrl": "https://www.archives.gov/", "verified": false }
+]
